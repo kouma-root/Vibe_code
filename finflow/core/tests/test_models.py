@@ -82,8 +82,10 @@ class UserModelTest(TestCase):
         """Test risk tolerance choices validation."""
         valid_choices = ['conservative', 'moderate', 'aggressive', 'very_aggressive']
         
-        for choice in valid_choices:
+        for i, choice in enumerate(valid_choices):
             user_data = self.user_data.copy()
+            user_data['username'] = f'testuser_{i}'
+            user_data['email'] = f'test{i}@example.com'
             user_data['risk_tolerance'] = choice
             user = User.objects.create_user(**user_data)
             self.assertEqual(user.risk_tolerance, choice)
@@ -95,8 +97,10 @@ class UserModelTest(TestCase):
             'dividend', 'balanced', 'sector_rotation'
         ]
         
-        for choice in valid_choices:
+        for i, choice in enumerate(valid_choices):
             user_data = self.user_data.copy()
+            user_data['username'] = f'testuser_style_{i}'
+            user_data['email'] = f'teststyle{i}@example.com'
             user_data['investment_style'] = choice
             user = User.objects.create_user(**user_data)
             self.assertEqual(user.investment_style, choice)
