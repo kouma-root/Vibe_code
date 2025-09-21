@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - FinFlow{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block current_page %}dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="mb-8">
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold mb-2">Welcome back, {{ user.full_name|default:user.username }}!</h1>
+                <p class="text-blue-100">Here's what's happening with your portfolios today.</p>
+            </div>
+            <div class="hidden md:block">
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-chart-line text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Portfolios -->
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 card-hover transition-all">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600">Total Portfolios</p>
+                <p class="text-3xl font-bold text-gray-900">{{ portfolios_count }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-briefcase text-blue-600 text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <span class="text-sm text-green-600 font-medium">
+                <i class="fas fa-arrow-up mr-1"></i>+2.5%
+            </span>
+            <span class="text-sm text-gray-500 ml-2">from last month</span>
+        </div>
+    </div>
+
+    <!-- Total Investments -->
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 card-hover transition-all">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600">Total Investments</p>
+                <p class="text-3xl font-bold text-gray-900">{{ investments_count }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-chart-bar text-green-600 text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <span class="text-sm text-green-600 font-medium">
+                <i class="fas fa-arrow-up mr-1"></i>+12.3%
+            </span>
+            <span class="text-sm text-gray-500 ml-2">from last month</span>
+        </div>
+    </div>
+
+    <!-- Risk Tolerance -->
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 card-hover transition-all">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600">Risk Tolerance</p>
+                <p class="text-3xl font-bold text-gray-900">{{ user.risk_tolerance|title }}</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-shield-alt text-yellow-600 text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-yellow-500 h-2 rounded-full" style="width: 60%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Style -->
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 card-hover transition-all">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600">Investment Style</p>
+                <p class="text-3xl font-bold text-gray-900">{{ user.investment_style|title }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-cogs text-purple-600 text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                Active Strategy
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Portfolio Performance Chart -->
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-gray-900">Portfolio Performance</h3>
+            <div class="flex space-x-2">
+                <button class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full">1M</button>
+                <button class="px-3 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-full">3M</button>
+                <button class="px-3 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded-full">1Y</button>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="portfolioChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Asset Allocation Chart -->
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-gray-900">Asset Allocation</h3>
+            <button class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-ellipsis-h"></i>
+            </button>
+        </div>
+        <div class="chart-container">
+            <canvas id="allocationChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity & Quick Actions -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Recent Transactions -->
+    <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-gray-900">Recent Transactions</h3>
+            <a href="#" class="text-blue-600 hover:text-blue-700 text-sm font-medium">View all</a>
+        </div>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-arrow-up text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900">Bought AAPL</p>
+                        <p class="text-sm text-gray-500">100 shares at $175.50</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="font-medium text-gray-900">$17,550.00</p>
+                    <p class="text-sm text-gray-500">2 hours ago</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-arrow-down text-red-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900">Sold MSFT</p>
+                        <p class="text-sm text-gray-500">50 shares at $380.25</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="font-medium text-gray-900">$19,012.50</p>
+                    <p class="text-sm text-gray-500">1 day ago</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-plus text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900">Added GOOGL</p>
+                        <p class="text-sm text-gray-500">25 shares at $142.80</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="font-medium text-gray-900">$3,570.00</p>
+                    <p class="text-sm text-gray-500">3 days ago</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h3>
+        <div class="space-y-3">
+            <a href="{% url 'core:portfolios' %}" class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fas fa-plus"></i>
+                <span>Add Investment</span>
+            </a>
+            
+            <a href="{% url 'core:portfolio_analytics' %}" class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                <i class="fas fa-chart-line"></i>
+                <span>View Analytics</span>
+            </a>
+            
+            <a href="{% url 'core:live_portfolio' %}" class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>Live Portfolio</span>
+            </a>
+            
+            <a href="{% url 'core:transactions' %}" class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Authentication Info -->
+<div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+    <div class="flex items-start space-x-4">
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-shield-alt text-blue-600 text-xl"></i>
+        </div>
+        <div class="flex-1">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Custom Authentication Backend Active</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p><strong>Username:</strong> {{ user.username }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                </div>
+                <div>
+                    <p><strong>Login Method:</strong> Username or Email</p>
+                    <p><strong>Security:</strong> Failed attempts logged</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Portfolio Performance Chart
+    const portfolioCtx = document.getElementById('portfolioChart').getContext('2d');
+    new Chart(portfolioCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Portfolio Value',
+                data: [45000, 47000, 46000, 48000, 50000, 52000],
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Asset Allocation Chart
+    const allocationCtx = document.getElementById('allocationChart').getContext('2d');
+    new Chart(allocationCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Stocks', 'Bonds', 'Cash', 'Crypto'],
+            datasets: [{
+                data: [60, 25, 10, 5],
+                backgroundColor: [
+                    '#3B82F6',
+                    '#10B981',
+                    '#F59E0B',
+                    '#EF4444'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

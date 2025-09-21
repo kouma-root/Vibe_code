@@ -1,0 +1,4 @@
+INFO 2025-09-21 22:28:36,757 backends 72996 138468493091072 Successful authentication for user: testuser (IP: 127.0.0.1)
+INFO 2025-09-21 22:28:37,856 backends 72996 138468493091072 Successful authentication for user: testuser (IP: 127.0.0.1)
+WARNING 2025-09-21 22:28:38,840 backends 72996 138468493091072 Failed authentication attempt - Invalid password for user: testuser (IP: 127.0.0.1, User-Agent: Test Script/1.0)
+INFO 2025-09-21 22:28:39,772 backends 72996 138468493091072 Failed authentication attempt - User not found for username/email: nonexistent (IP: 127.0.0.1, User-Agent: Test Script/1.0)

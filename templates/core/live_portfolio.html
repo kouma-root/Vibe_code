@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Portfolio - FinFlow</title>
+    {% load static %}
+    <link href="{% static 'css/output.css' %}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="bg-white shadow-lg rounded-lg p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Live Portfolio Feed</h1>
+                    <p class="text-gray-600 mt-2">Real-time portfolio price updates</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Connection Status -->
+                    <div class="flex items-center space-x-2">
+                        <div id="connection-status" class="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <span id="connection-text" class="text-sm text-gray-600">Disconnected</span>
+                    </div>
+                    
+                    <!-- Control Buttons -->
+                    <button id="start-updates" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200 disabled:opacity-50">
+                        Start Updates
+                    </button>
+                    <button id="stop-updates" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200 disabled:opacity-50">
+                        Stop Updates
+                    </button>
+                    
+                    <!-- Navigation -->
+                    <a href="{% url 'core:home' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                        Home
+                    </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'core:dashboard' %}" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                        Dashboard
+                    </a>
+                    {% else %}
+                    <a href="{% url 'core:login' %}" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                        Login
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <!-- Portfolio Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Total Value Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Total Portfolio Value</p>
+                        <p id="total-value" class="text-2xl font-bold text-gray-800">$0.00</p>
+                    </div>
+                    <div class="text-3xl">💰</div>
+                </div>
+                <div class="mt-2">
+                    <span id="total-change" class="text-sm font-medium">$0.00</span>
+                    <span id="total-change-percent" class="text-sm ml-2">(0.00%)</span>
+                </div>
+            </div>
+
+            <!-- Total Change Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Today's Change</p>
+                        <p id="today-change" class="text-2xl font-bold text-gray-800">$0.00</p>
+                    </div>
+                    <div class="text-3xl">📈</div>
+                </div>
+                <div class="mt-2">
+                    <span id="today-change-percent" class="text-sm font-medium">0.00%</span>
+                </div>
+            </div>
+
+            <!-- Last Update Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Last Update</p>
+                        <p id="last-update" class="text-lg font-semibold text-gray-800">Never</p>
+                    </div>
+                    <div class="text-3xl">🕒</div>
+                </div>
+                <div class="mt-2">
+                    <span id="update-count" class="text-sm text-gray-600">0 updates</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portfolio Chart -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Portfolio Performance</h2>
+            <div class="h-64">
+                <canvas id="portfolio-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Investments Table -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Portfolio Holdings</h2>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-600">Auto-refresh:</span>
+                    <div id="refresh-indicator" class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Symbol</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Price</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="investments-table" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                                    <span>Connecting to live feed...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Debug Information (for development) -->
+        <div class="mt-8 bg-gray-800 text-white rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Debug Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p><strong>WebSocket URL:</strong> <span id="ws-url">ws://localhost:8000/ws/portfolio/</span></p>
+                    <p><strong>Connection State:</strong> <span id="ws-state">Not Connected</span></p>
+                    <p><strong>User:</strong> <span id="user-info">{{ user.username|default:"Anonymous" }}</span></p>
+                </div>
+                <div>
+                    <p><strong>Messages Received:</strong> <span id="message-count">0</span></p>
+                    <p><strong>Last Message:</strong> <span id="last-message">None</span></p>
+                    <p><strong>Errors:</strong> <span id="error-count">0</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class PortfolioWebSocket {
+            constructor() {
+                this.socket = null;
+                this.isConnected = false;
+                this.updateCount = 0;
+                this.errorCount = 0;
+                this.chart = null;
+                this.chartData = {
+                    labels: [],
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: [],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.1
+                    }]
+                };
+                this.maxDataPoints = 20;
+                
+                this.initializeElements();
+                this.initializeChart();
+                this.bindEvents();
+                this.connect();
+            }
+
+            initializeElements() {
+                this.elements = {
+                    connectionStatus: document.getElementById('connection-status'),
+                    connectionText: document.getElementById('connection-text'),
+                    startButton: document.getElementById('start-updates'),
+                    stopButton: document.getElementById('stop-updates'),
+                    totalValue: document.getElementById('total-value'),
+                    totalChange: document.getElementById('total-change'),
+                    totalChangePercent: document.getElementById('total-change-percent'),
+                    todayChange: document.getElementById('today-change'),
+                    todayChangePercent: document.getElementById('today-change-percent'),
+                    lastUpdate: document.getElementById('last-update'),
+                    updateCount: document.getElementById('update-count'),
+                    investmentsTable: document.getElementById('investments-table'),
+                    refreshIndicator: document.getElementById('refresh-indicator'),
+                    wsUrl: document.getElementById('ws-url'),
+                    wsState: document.getElementById('ws-state'),
+                    messageCount: document.getElementById('message-count'),
+                    lastMessage: document.getElementById('last-message'),
+                    errorCount: document.getElementById('error-count')
+                };
+            }
+
+            initializeChart() {
+                const ctx = document.getElementById('portfolio-chart').getContext('2d');
+                this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: this.chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            bindEvents() {
+                this.elements.startButton.addEventListener('click', () => this.startUpdates());
+                this.elements.stopButton.addEventListener('click', () => this.stopUpdates());
+            }
+
+            connect() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/ws/portfolio/`;
+                
+                this.elements.wsUrl.textContent = wsUrl;
+                this.elements.wsState.textContent = 'Connecting...';
+                
+                this.socket = new WebSocket(wsUrl);
+                
+                this.socket.onopen = (event) => {
+                    console.log('WebSocket connected');
+                    this.isConnected = true;
+                    this.updateConnectionStatus(true);
+                    this.elements.wsState.textContent = 'Connected';
+                    
+                    // Request initial portfolio data
+                    this.sendMessage({ type: 'get_portfolio_data' });
+                };
+                
+                this.socket.onmessage = (event) => {
+                    this.handleMessage(JSON.parse(event.data));
+                };
+                
+                this.socket.onclose = (event) => {
+                    console.log('WebSocket disconnected');
+                    this.isConnected = false;
+                    this.updateConnectionStatus(false);
+                    this.elements.wsState.textContent = 'Disconnected';
+                    
+                    // Attempt to reconnect after 3 seconds
+                    setTimeout(() => {
+                        if (!this.isConnected) {
+                            this.connect();
+                        }
+                    }, 3000);
+                };
+                
+                this.socket.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    this.errorCount++;
+                    this.elements.errorCount.textContent = this.errorCount;
+                };
+            }
+
+            updateConnectionStatus(connected) {
+                if (connected) {
+                    this.elements.connectionStatus.className = 'w-3 h-3 bg-green-500 rounded-full';
+                    this.elements.connectionText.textContent = 'Connected';
+                    this.elements.startButton.disabled = false;
+                    this.elements.stopButton.disabled = false;
+                } else {
+                    this.elements.connectionStatus.className = 'w-3 h-3 bg-red-500 rounded-full';
+                    this.elements.connectionText.textContent = 'Disconnected';
+                    this.elements.startButton.disabled = true;
+                    this.elements.stopButton.disabled = true;
+                }
+            }
+
+            sendMessage(message) {
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify(message));
+                }
+            }
+
+            handleMessage(data) {
+                this.updateCount++;
+                this.elements.messageCount.textContent = this.updateCount;
+                this.elements.lastMessage.textContent = data.type || 'Unknown';
+                
+                switch (data.type) {
+                    case 'connection_established':
+                        console.log('Connection established:', data.message);
+                        break;
+                        
+                    case 'portfolio_data':
+                        this.updatePortfolioData(data.data);
+                        break;
+                        
+                    case 'price_update':
+                        this.updatePortfolioData(data.data);
+                        this.updateChart(data.data);
+                        break;
+                        
+                    case 'error':
+                        console.error('WebSocket error:', data.message);
+                        this.errorCount++;
+                        this.elements.errorCount.textContent = this.errorCount;
+                        break;
+                        
+                    default:
+                        console.log('Unknown message type:', data.type);
+                }
+            }
+
+            updatePortfolioData(data) {
+                if (!data) return;
+                
+                // Update summary cards
+                this.elements.totalValue.textContent = `$${data.total_value?.toLocaleString() || '0.00'}`;
+                this.elements.totalChange.textContent = `$${data.total_change?.toLocaleString() || '0.00'}`;
+                this.elements.totalChangePercent.textContent = `(${data.total_change_percent?.toFixed(2) || '0.00'}%)`;
+                
+                // Update today's change (same as total change for demo)
+                this.elements.todayChange.textContent = `$${data.total_change?.toLocaleString() || '0.00'}`;
+                this.elements.todayChangePercent.textContent = `${data.total_change_percent?.toFixed(2) || '0.00'}%`;
+                
+                // Update last update time
+                const now = new Date();
+                this.elements.lastUpdate.textContent = now.toLocaleTimeString();
+                this.elements.updateCount.textContent = `${this.updateCount} updates`;
+                
+                // Update investments table
+                this.updateInvestmentsTable(data.investments || []);
+                
+                // Update change colors
+                this.updateChangeColors(data.total_change_percent);
+            }
+
+            updateInvestmentsTable(investments) {
+                if (!investments || investments.length === 0) {
+                    this.elements.investmentsTable.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                No investments found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                this.elements.investmentsTable.innerHTML = investments.map(investment => {
+                    const changeClass = investment.change >= 0 ? 'text-green-600' : 'text-red-600';
+                    const changeIcon = investment.change >= 0 ? '↗' : '↘';
+                    
+                    return `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">${investment.symbol}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">${investment.name || investment.symbol}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">${investment.quantity?.toLocaleString() || '0'}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">$${investment.current_price?.toFixed(2) || '0.00'}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm ${changeClass}">
+                                    ${changeIcon} $${investment.change?.toFixed(2) || '0.00'} (${investment.change_percent?.toFixed(2) || '0.00'}%)
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">$${investment.value?.toLocaleString() || '0.00'}</div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            updateChart(data) {
+                if (!data || !data.total_value) return;
+                
+                const now = new Date();
+                const timeLabel = now.toLocaleTimeString();
+                
+                // Add new data point
+                this.chartData.labels.push(timeLabel);
+                this.chartData.datasets[0].data.push(data.total_value);
+                
+                // Keep only the last maxDataPoints
+                if (this.chartData.labels.length > this.maxDataPoints) {
+                    this.chartData.labels.shift();
+                    this.chartData.datasets[0].data.shift();
+                }
+                
+                // Update chart
+                this.chart.update('none');
+            }
+
+            updateChangeColors(changePercent) {
+                const changeElements = [
+                    this.elements.totalChange,
+                    this.elements.totalChangePercent,
+                    this.elements.todayChange,
+                    this.elements.todayChangePercent
+                ];
+                
+                changeElements.forEach(element => {
+                    if (changePercent > 0) {
+                        element.className = element.className.replace(/text-red-600|text-gray-600/g, 'text-green-600');
+                    } else if (changePercent < 0) {
+                        element.className = element.className.replace(/text-green-600|text-gray-600/g, 'text-red-600');
+                    } else {
+                        element.className = element.className.replace(/text-green-600|text-red-600/g, 'text-gray-600');
+                    }
+                });
+            }
+
+            startUpdates() {
+                this.sendMessage({ type: 'start_updates' });
+                this.elements.refreshIndicator.className = 'w-2 h-2 bg-green-500 rounded-full animate-pulse';
+            }
+
+            stopUpdates() {
+                this.sendMessage({ type: 'stop_updates' });
+                this.elements.refreshIndicator.className = 'w-2 h-2 bg-gray-400 rounded-full';
+            }
+        }
+
+        // Initialize the WebSocket connection when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new PortfolioWebSocket();
+        });
+    </script>
+</body>
+</html>

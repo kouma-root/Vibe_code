@@ -1,0 +1,45 @@
+INFO 2025-09-21 22:30:50,404 autoreload 73482 127339230638336 Watching for file changes with StatReloader
+INFO 2025-09-21 22:30:53,114 basehttp 73482 127339165521600 "GET / HTTP/1.1" 200 4629
+INFO 2025-09-21 22:30:53,279 basehttp 73482 127339165521600 "GET /static/css/output.css HTTP/1.1" 304 0
+INFO 2025-09-21 22:31:01,797 basehttp 73482 127339165521600 "GET /analytics/ HTTP/1.1" 200 12647
+INFO 2025-09-21 22:31:05,446 basehttp 73482 127339165521600 "GET /admin/ HTTP/1.1" 302 0
+INFO 2025-09-21 22:31:05,493 basehttp 73482 127339165521600 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4173
+INFO 2025-09-21 22:31:13,677 basehttp 73482 127339165521600 "GET /api/health/ HTTP/1.1" 200 5463
+INFO 2025-09-21 22:31:13,847 basehttp 73482 127339147687616 "GET /static/rest_framework/css/default.css HTTP/1.1" 200 1152
+INFO 2025-09-21 22:31:13,849 basehttp 73482 127339157128896 "GET /static/rest_framework/css/bootstrap-tweaks.css HTTP/1.1" 200 3426
+INFO 2025-09-21 22:31:13,850 basehttp 73482 127339165521600 "GET /static/rest_framework/css/bootstrap.min.css HTTP/1.1" 200 121457
+INFO 2025-09-21 22:31:13,851 basehttp 73482 127338935219904 "GET /static/rest_framework/js/jquery-3.7.1.min.js HTTP/1.1" 200 87533
+INFO 2025-09-21 22:31:13,849 basehttp 73482 127338926827200 "GET /static/rest_framework/js/ajax-form.js HTTP/1.1" 200 3796
+INFO 2025-09-21 22:31:13,849 basehttp 73482 127338918434496 "GET /static/rest_framework/js/csrf.js HTTP/1.1" 200 1793
+INFO 2025-09-21 22:31:13,886 basehttp 73482 127338918434496 "GET /static/rest_framework/js/load-ajax-form.js HTTP/1.1" 200 59
+INFO 2025-09-21 22:31:13,887 basehttp 73482 127339147687616 "GET /static/rest_framework/js/bootstrap.min.js HTTP/1.1" 200 39680
+INFO 2025-09-21 22:31:13,888 basehttp 73482 127339157128896 "GET /static/rest_framework/js/prettify-min.js HTTP/1.1" 200 13632
+INFO 2025-09-21 22:31:13,889 basehttp 73482 127338926827200 "GET /static/rest_framework/js/default.js HTTP/1.1" 200 1268
+INFO 2025-09-21 22:31:13,941 basehttp 73482 127338926827200 "GET /static/rest_framework/img/grid.png HTTP/1.1" 200 1458
+INFO 2025-09-21 22:31:15,972 basehttp 73482 127338926827200 "GET /api/health/ HTTP/1.1" 200 5463
+INFO 2025-09-21 22:31:17,526 basehttp 73482 127338926827200 "GET /api/health/ HTTP/1.1" 200 5463
+INFO 2025-09-21 22:31:21,190 basehttp 73482 127338926827200 "GET /api/health/?format=json HTTP/1.1" 200 73
+INFO 2025-09-21 22:38:52,079 autoreload 74721 139027617550592 Watching for file changes with StatReloader
+WARNING 2025-09-21 22:38:57,559 log 74721 139027484243648 Not Found: /ws/portfolio/
+WARNING 2025-09-21 22:38:57,560 basehttp 74721 139027484243648 "GET /ws/portfolio/ HTTP/1.1" 404 5398
+INFO 2025-09-21 22:39:08,960 basehttp 74721 139027484243648 "HEAD /live-portfolio/ HTTP/1.1" 200 0
+INFO 2025-09-21 22:44:56,247 autoreload 77029 124185427759360 Watching for file changes with StatReloader
+INFO 2025-09-21 22:45:15,853 autoreload 77081 126275782574336 Watching for file changes with StatReloader
+INFO 2025-09-21 22:45:19,567 basehttp 77081 126275718702784 "GET / HTTP/1.1" 200 4839
+INFO 2025-09-21 22:45:24,652 basehttp 77081 126275718702784 "GET /admin/ HTTP/1.1" 302 0
+INFO 2025-09-21 22:45:24,736 basehttp 77081 126275718702784 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4173
+INFO 2025-09-21 22:45:47,079 basehttp 77081 126275718702784 "GET /api/health/ HTTP/1.1" 200 5463
+INFO 2025-09-21 22:46:47,379 autoreload 77081 126275782574336 /home/kouma/Desktop/Personal_Projects/Vibe_code/finflow/celery.py changed, reloading.
+INFO 2025-09-21 22:46:48,771 autoreload 77365 135032462090496 Watching for file changes with StatReloader
+INFO 2025-09-21 22:47:04,996 autoreload 77365 135032462090496 /home/kouma/Desktop/Personal_Projects/Vibe_code/finflow/settings.py changed, reloading.
+INFO 2025-09-21 22:47:06,296 autoreload 77491 127957003055360 Watching for file changes with StatReloader
+INFO 2025-09-21 22:47:13,076 autoreload 77491 127957003055360 /home/kouma/Desktop/Personal_Projects/Vibe_code/finflow/settings.py changed, reloading.
+INFO 2025-09-21 22:47:14,037 autoreload 77530 138374366904576 Watching for file changes with StatReloader
+INFO 2025-09-21 22:54:55,031 autoreload 77530 138374366904576 /home/kouma/Desktop/Personal_Projects/Vibe_code/finflow/settings.py changed, reloading.
+INFO 2025-09-21 22:54:56,107 autoreload 78691 125250631074048 Watching for file changes with StatReloader
+INFO 2025-09-21 23:04:50,354 autoreload 79864 135903474790656 Watching for file changes with StatReloader
+INFO 2025-09-21 23:06:33,385 autoreload 79864 135903474790656 /home/kouma/Desktop/Personal_Projects/Vibe_code/finflow/core/urls.py changed, reloading.
+INFO 2025-09-21 23:06:35,263 autoreload 80110 134127223034112 Watching for file changes with StatReloader
+INFO 2025-09-21 23:08:10,309 autoreload 80463 124007070793984 Watching for file changes with StatReloader
+INFO 2025-09-21 23:08:13,684 basehttp 80463 124007003727552 "GET / HTTP/1.1" 200 4839
+INFO 2025-09-21 23:08:23,937 basehttp 80463 124007003727552 "GET /analytics/ HTTP/1.1" 200 12647
